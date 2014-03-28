@@ -1,0 +1,67 @@
+#!/usr/bin/python
+"""
+import urllib
+import urllib2
+import sqlite3 as lite
+import sys
+from datetime import datetime
+
+database = '/opt/www/alarm.db'
+logfile = '/tmp/sensorstate'
+file = open(logfile, "a")
+FORMAT = '%Y/%m/%d %H:%M:%S'
+
+todd = 0
+
+if todd :
+    user = 'ugmhJnpLacDZfBovQLx1eCx24kH2LP'
+    app = 'ajbijx9smafA5WBirvfvFR4R6rdbZP'
+else :
+    user = 'usAGx9S51pbJHke8c6cNUnPKpbNRyq' 
+    app = 'awymU3Ej4t2qySqo9u5xLThhLjqE48'
+
+myState = int(sys.argv[2])
+
+if myState > 1999 :
+	myState -= 2000
+	
+# Setup Database Connectivity
+con = lite.connect(database)
+with con:
+    cur = con.cursor()
+    cur.execute("UPDATE alarm SET state="+str(myState)+" WHERE sensor="+str(sys.argv[1]))
+    cur.execute("SELECT name from alarm where sensor="+str(sys.argv[1]))
+    record = cur.fetchone()        
+    cur.execute("SELECT switchType from alarm where sensor="+str(sys.argv[1]))
+    record2 = cur.fetchone()        
+sensor = record[0]
+state = 'Open'
+
+if (int(sys.argv[2])) == 0 and int(record2[0] == 1):
+   state = 'Closed'
+        
+if (int(sys.argv[2])) == 1 and int(record2[0] == 0) :
+   state = 'Closed'
+        
+message = '{0} is {1}'.format(sensor,state)
+
+url = 'https://api.pushover.net/1/messages.json'
+values = {'token' : app,
+          'user' : user,
+          'title' : 'ALARM Notification',
+          'message' : message }
+headers = { 'Content-type' : 'application/x-www-form-urlencoded' }
+
+data = urllib.urlencode(values)
+req = urllib2.Request(url, data, headers)
+
+if int(sys.argv[2]) < 2000: 
+   try: 
+      urllib2.urlopen(req)
+   except urllib2.URLError as e:
+      print e.reason
+      
+message = '%s - %s %s\n' % (datetime.now().strftime(FORMAT),' LININO:',message)
+file.write(message)
+file.close()
+"""
